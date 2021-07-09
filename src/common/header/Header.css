@@ -1,0 +1,35 @@
+.header-element {
+    width:100%;
+    background-color: #222;
+    height:36px;
+    padding: 8px 32px 8px 16px;
+}
+
+.header-btn-container {
+    float:right;
+    padding-right: 36px;
+}
+
+.header-btn {
+    background-color: #222;
+}
+
+.logo-container {
+    float:left;
+}
+
+.logo {
+    height:35px;
+    width:35px;
+    background-color:#ff7f7f;
+    animation: rotation 8s infinite linear;
+}
+
+@keyframes rotation {
+    from {
+        transform: rotateY(0deg);
+    }
+    to {
+        transform: rotateY(359deg);
+    }
+}
