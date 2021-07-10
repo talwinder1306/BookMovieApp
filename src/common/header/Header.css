@@ -1,5 +1,5 @@
 .header-element {
-    width:100%;
+    width: calc(100% - 48px);
     background-color: #222;
     height:36px;
     padding: 8px 32px 8px 16px;
@@ -7,11 +7,10 @@
 
 .header-btn-container {
     float:right;
-    padding-right: 36px;
 }
 
-.header-btn {
-    background-color: #222;
+.header-btn-container button{
+    margin-right: 10px;
 }
 
 .logo-container {
@@ -32,4 +31,8 @@
     to {
         transform: rotateY(359deg);
     }
+}
+
+.bookShowHide {
+    display:none;
 }
