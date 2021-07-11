@@ -1,4 +1,4 @@
-import React, {Fragment} from 'react';
+import React, {Fragment, useEffect, useState} from 'react';
 import './Details.css';
 import Typography from "@material-ui/core/Typography";
 import Header from "../../common/header/Header";
@@ -8,47 +8,51 @@ import StarBorderIcon from '@material-ui/icons/StarBorder';
 import GridListTile from "@material-ui/core/GridListTile";
 import GridListTileBar from "@material-ui/core/GridListTileBar";
 import GridList from "@material-ui/core/GridList";
+import { Link, useLocation } from 'react-router-dom';
 
-export default function Details() {
+export default function Details(props) {
+    const location = useLocation();
+    const [movieDetails, setMovieDetails] = useState({
+        id: '',
+        title: '',
+        poster_url: '',
+        trailer_url: '',
+        genres: [],
+        duration: '',
+        release_date: '',
+        rating: '',
+        wiki_url: '',
+        storyline: '',
+        artists: []
+    });
+    const fetchMovie = () => {
+        const movieId = location.movieId;
+        fetch(`http://localhost:8085/api/v1/movies/${movieId}`)
+            .then(response => response.json())
+            .then(data => {
+                const {id, title, poster_url, trailer_url, genres, duration,release_date, rating, wiki_url, storyline, artists} = data;
+                const movie = {
+                    id: id,
+                    title: title,
+                    poster_url: poster_url,
+                    trailer_url: trailer_url,
+                    genres: genres,
+                    duration: duration,
+                    release_date: release_date,
+                    rating: rating,
+                    wiki_url: wiki_url,
+                    storyline: storyline,
+                    artists: artists,
+                }
 
-    const props = {
-        "id": "52974be0-a235-11e8-9077-720006ceb890",
-        "title": "Inception",
-        "storyline": "A thief, who steals corporate secrets through the use of dream-sharing technology, is given the inverse task of planting an idea into the mind of a CEO.",
-        "genres": [
-            "Action",
-            "Adventure",
-            "Scifi"
-        ],
-        "duration": 148,
-        "poster_url": "https://upload.wikimedia.org/wikipedia/en/2/2e/Inception_%282010%29_theatrical_poster.jpg",
-        "trailer_url": "https://www.youtube.com/watch?v=8hP9D6kZseM",
-        "wiki_url": "https://en.wikipedia.org/wiki/Inception",
-        "release_date": "2010-07-16",
-        "censor_board_rating": "UA",
-        "rating": 8.8,
-        "status": "RELEASED",
-        "artists": [
-            {
-                "id": "24614e76-a238-11e8-9077-720006ceb890",
-                "first_name": "Leonardo",
-                "last_name": "DiCaprio",
-                "role_type": "ACTOR",
-                "profile_description": "Leonardo Wilhelm DiCaprio is an American actor and film producer. DiCaprio began his career by appearing in television commercials in the late 1980s. He next had recurring roles in various television series, such as the soap opera Santa Barbara and the sitcom Growing Pains. DiCaprios portrayals of Howard Hughes in The Aviator (2004) and Hugh Glass in The Revenant won him the Golden Globe Award for Best Actor – Motion Picture Drama. His performance as Jordan Belfort in The Wolf of Wall Street won him the Golden Globe award for Best Actor – Motion Picture Musical or Comedy. He also won the Academy Award for Best Actor and BAFTA Award for his performance in The Revenant. DiCaprio is the founder of his own production company, Appian Way Productions.",
-                "profile_url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Leonardo_DiCaprio_visited_Goddard_Saturday_to_discuss_Earth_science_with_Piers_Sellers_%2826105091624%29_cropped.jpg",
-                "wiki_url": "https://en.wikipedia.org/wiki/Leonardo_DiCaprio"
-            },
-            {
-                "id": "24615498-a238-11e8-9077-720006ceb890",
-                "first_name": "Joseph",
-                "last_name": "Gordon-Levitt",
-                "role_type": "ACTOR",
-                "profile_description": "Joseph Leonard Gordon-Levitt is an American actor, filmmaker, singer, and entrepreneur. As a child, Gordon-Levitt appeared in many films and TV series. He took a break from acting to study at Columbia University, but dropped out in 2004 to pursue acting again. He has since starred in  films like (500) Days of Summer, Inception, The Dark Knight Rises, G.I. Joe: The Rise of Cobra and others. For his leading performances in (500) Days of Summer and 50/50, he was nominated for the Golden Globe Award for Best Actor – Motion Picture Musical or Comedy.",
-                "profile_url": "https://upload.wikimedia.org/wikipedia/commons/7/7d/Joseph_Gordon-Levitt_2013.jpg",
-                "wiki_url": "https://en.wikipedia.org/wiki/Joseph_Gordon-Levitt"
-            }
-        ]
+                setMovieDetails(movie);
+                console.log(`Movie ${movie}`);
+            });
     }
+
+    useEffect(() => {
+        fetchMovie();
+    }, []);
 
     const useStyles = makeStyles((theme) => ({
         boldText: {
@@ -81,38 +85,40 @@ export default function Details() {
         e.target.style.color = 'yellow';
     }
 
-    const videoId = props.trailer_url.slice(props.trailer_url.indexOf('?v=') + 3, props.trailer_url.length);
+    const videoId = movieDetails !== undefined? movieDetails.trailer_url.slice(movieDetails.trailer_url.indexOf('?v=') + 3, movieDetails.trailer_url.length) : '';
     console.log(videoId);
 
     return (
         <Fragment>
             <Header isDetailPage="true" />
-            <Typography id="backToHomeBtn" variant="button" display="block" gutterBottom>
-                {'<'} Back to Home
-            </Typography>
+            <Link to="/">
+                <Typography id="backToHomeBtn" variant="button" display="block" gutterBottom>
+                    {'<'} Back to Home
+                </Typography>
+            </Link>
             <div className="details-container">
                 <div className="left-col">
-                    <img src={props.poster_url} alt={props.title} />
+                        <img src={movieDetails.poster_url} alt={movieDetails.title} />
                 </div>
                 <div className="middle-col">
                     <Typography variant="h4" component="h2" gutterBottom>
-                        {props.title}
+                        {movieDetails.title}
                     </Typography>
                     <Typography>
-                       <span className={classes.boldText}>Genres: </span> {props.genres.join(', ')}
+                       <span className={classes.boldText}>Genres: </span> {movieDetails.genres.join(', ')}
                     </Typography>
                     <Typography>
-                        <span className={classes.boldText}>Duration: </span> {props.duration}
+                        <span className={classes.boldText}>Duration: </span> {movieDetails.duration}
                     </Typography>
                     <Typography>
-                        <span className={classes.boldText}>Release Date: </span> {new Date(props.release_date).toDateString()}
+                        <span className={classes.boldText}>Release Date: </span> {new Date(movieDetails.release_date).toDateString()}
                     </Typography>
                     <Typography>
-                        <span className={classes.boldText}>Rating: </span> {props.rating}
+                        <span className={classes.boldText}>Rating: </span> {movieDetails.rating}
                     </Typography>
                     <Typography className={classes.sectionSpace}>
                         <span className={classes.boldText}>Plot: </span>
-                        (<a href={props.wiki_url} target="_blank" rel="noopener noreferrer" >Wiki Link</a>) {props.storyline}
+                        (<a href={movieDetails.wiki_url} target="_blank" rel="noopener noreferrer" >Wiki Link</a>) {movieDetails.storyline}
                     </Typography>
 
                     <Typography className={classes.sectionSpace}>
@@ -143,7 +149,7 @@ export default function Details() {
 
                     <GridList className={classes.gridMain} cols={2} cellHeight="250">
                         {
-                            props.artists.map(artist =>  (
+                            movieDetails.artists.map(artist =>  (
                                     <GridListTile
                                         key={artist.id}
                                     >

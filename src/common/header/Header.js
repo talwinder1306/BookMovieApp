@@ -8,7 +8,7 @@ export default function Header(props) {
 
     const [open, setOpen] = React.useState(false); //Modal
 
-    const [accessToken, setAccessToken] = useState(false);
+    const [accessToken, setAccessToken] = useState('');
     const [loginBtn, setLoginBtn] = useState('Login');
     const [showBookShow, setShowBookShow] = useState(false);
 
@@ -37,13 +37,22 @@ export default function Header(props) {
         }
     };
 
+    const handleBookShow = () => {
+        if(accessToken === '' || loginBtn === 'Login') {
+            handleOpen();
+        } else {
+            alert("Show Booked")
+        }
+    };
+
     return (
        <header className="header-element" >
            <div className="logo-container">
                <img src={logo} className="logo" alt="logo"/>
            </div>
            <div className="header-btn-container">
-               {showBookShow? <Button className="bookShow" name="Book Show" variant="contained" color="primary">Book Show</Button> : null}
+               {showBookShow?
+                   <Button className="bookShow" name="Book Show" variant="contained" color="primary" onClick={handleBookShow}>Book Show</Button> : null}
 
                {loginBtn === 'Login' ? <Button className="header-btn" variant="contained" name={loginBtn} onClick={handleOpen}>{loginBtn}</Button> :
                    <Button className="header-btn" variant="contained" name={loginBtn} onClick={handleLogout}>{loginBtn}</Button>}

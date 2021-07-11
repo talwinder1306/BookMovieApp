@@ -16,7 +16,7 @@ import FormControl from '@material-ui/core/FormControl';
 import ListItemText from '@material-ui/core/ListItemText';
 import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
-
+import { Link } from 'react-router-dom';
 import {makeStyles} from "@material-ui/core";
 
 export default function Home() {
@@ -275,16 +275,23 @@ export default function Home() {
                         <GridList className={classes.rgridList} cols={4} cellHeight="350">
                             {
                                 releasedMovies.map(movie =>  (
+
                                         <GridListTile
                                             className={classes.rgridListTile}
                                             key={movie.poster_url}
                                             >
-                                            <img src={movie.poster_url} alt={movie.title} />
+                                            <Link to={{
+                                                pathname: '/detail',
+                                                movieId : movie.id
+                                            }} >
+                                                <img src={movie.poster_url} alt={movie.title} className="image-link"/>
+                                            </Link>
                                             <GridListTileBar
                                                 title={movie.title}
                                                 subtitle={<span>Released Date: {movie.release_date}</span>}
                                             ></GridListTileBar>
                                         </GridListTile>
+
                                     )
                                 )
                             }
