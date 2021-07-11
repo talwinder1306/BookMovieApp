@@ -108,12 +108,9 @@ export default function Home() {
                         })
 
                         const newReleasedMovies = [];
-                        var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-                        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
                         released.forEach((m) => {
                             const {id, title, poster_url, release_date, genres, artists} = m;
-                            let d = new Date(release_date);
-                            const release_date_formatted = `${days[d.getDay()]} ${months[d.getMonth()]} ${d.getDate()} ${d.getFullYear()}`;
+                            const release_date_formatted = new Date(release_date).toDateString();
                             const val = {
                                 id: id,
                                 title: title,
