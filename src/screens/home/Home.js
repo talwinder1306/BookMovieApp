@@ -9,6 +9,13 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import ListItemText from '@material-ui/core/ListItemText';
+import Select from '@material-ui/core/Select';
+import Checkbox from '@material-ui/core/Checkbox';
 
 import {makeStyles} from "@material-ui/core";
 
@@ -16,8 +23,17 @@ export default function Home() {
 
     const [upcomingMovies, setUpcomingMovies] = useState([]);
     const [releasedMovies, setReleasedMovies] = useState([]);
-    const [genres, setGenres] = useState([]);
-    const [artists, setArtists] = useState([]);
+    const [completeReleasedMovies, setCompleteReleasedMovies] = useState([]);
+    const [allGenres, setAllGenres] = useState([]);
+    const [allArtists, setAllArtists] = useState([]);
+    const [genresSelected, setGenresSelected] = useState([]);
+    const [artistsSelected, setArtistsSelected] = useState([]);
+    const [filterForm, setFilterForm] = useState({
+        moviename: '',
+        releaseStartDate: '',
+        releaseEndDate: '',
+
+    })
 
     const useStyles = makeStyles((theme) => ({
         ugridMain: {
@@ -47,8 +63,8 @@ export default function Home() {
             backgroundColor: theme.palette.background.paper,
         },
         rgridListTile: {
-            margin: 16,
-            cursor: "pointer"
+            margin: '16px',
+            cursor: "pointer",
         },
         card: {
             minWidth: 275,
@@ -59,6 +75,12 @@ export default function Home() {
         },
         cardPos: {
             marginBottom: 12,
+        },
+        formControl: {
+            margin: theme.spacing(1),
+            minWidth: 120,
+            maxWidth: 300,
+            width: '86%',
         },
     }));
 
@@ -89,19 +111,22 @@ export default function Home() {
                         var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
                         var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
                         released.forEach((m) => {
-                            const {id, title, poster_url, release_date} = m;
+                            const {id, title, poster_url, release_date, genres, artists} = m;
                             let d = new Date(release_date);
                             const release_date_formatted = `${days[d.getDay()]} ${months[d.getMonth()]} ${d.getDate()} ${d.getFullYear()}`;
                             const val = {
                                 id: id,
                                 title: title,
                                 poster_url: poster_url,
-                                release_date: release_date_formatted
+                                release_date: release_date_formatted,
+                                genres: genres,
+                                artists: artists
                             };
                             newReleasedMovies.push(val);
                         })
                         setUpcomingMovies(newUpcomingMovies);
                         setReleasedMovies(newReleasedMovies);
+                        setCompleteReleasedMovies(newReleasedMovies);
                         console.log(newReleasedMovies);
                     })
             })
@@ -118,8 +143,8 @@ export default function Home() {
                     }
                 )
 
-                setGenres(newGenres);
-                console.log(`Genres ${genres}`);
+                setAllGenres(newGenres);
+                console.log(`Genres ${allGenres}`);
             });
     }
 
@@ -138,20 +163,96 @@ export default function Home() {
                             newArtists.push(name);
                         })
 
-                        setArtists(newArtists);
-                        console.log(artists);
+                        setAllArtists(newArtists);
+                        console.log(allArtists);
                     })
             });
     }
+
+    const handleGenreChange = (event) => {
+        setGenresSelected(event.target.value);
+    };
+
+    const handleArtistChange = (event) => {
+        setArtistsSelected(event.target.value);
+    };
+
+    const filterInputChangedHandler = (e) => {
+        const state = filterForm;
+        state[e.target.name] = e.target.value;
+        setFilterForm({...state})
+    }
+
+    const onFilterApplied = (e) => {
+        e.preventDefault();
+        let filteredList = completeReleasedMovies;
+        if(moviename !== '') {
+            filteredList = filteredList.filter(data => data.title.includes(moviename));
+        }
+        console.log(filteredList);
+        if(releaseStartDate !== '' && releaseEndDate !== '') {
+            filteredList = filteredList.filter(data => {
+                const release = new Date(data.release_date).getTime();
+                const start = new Date(releaseStartDate).getTime();
+                const end = new Date(releaseEndDate).getTime();
+                return release >= start && release <= end
+            });
+        }
+        console.log(genresSelected);
+        if(genresSelected.length > 0) {
+            filteredList = filteredList.filter(data => {
+                console.log(data.genres);
+                let result = false;
+                for(let i=0; i < data.genres.length; i++) {
+                    const d = data.genres[i];
+                    if(genresSelected.includes(d)) {
+                        result = true;
+                        break;
+                    }
+                }
+                console.log(result);
+                return result;
+            });
+        }
+
+        console.log(filteredList);
+
+        console.log(artistsSelected);
+
+        if(artistsSelected.length > 0) {
+            filteredList = filteredList.filter(data => {
+                console.log(data.artists);
+                let result = false;
+                for(let i=0; i < data.artists.length; i++) {
+                    const d = `${data.artists[i].first_name} ${data.artists[i].last_name}`;
+                    if(artistsSelected.includes(d)) {
+                        result = true;
+                        break;
+                    }
+                }
+                console.log(result);
+                return result;
+            });
+        }
+
+        console.log(filteredList);
+
+        if(moviename === '' && (releaseStartDate === '' || releaseEndDate === '')
+            && genresSelected.length === 0 && artistsSelected.length === 0) {
+            setReleasedMovies(completeReleasedMovies);
+        } else {
+            setReleasedMovies(filteredList);
+        }
+    }
+    
     useEffect(() => {
         fetchMoviesList();
         fetchGenres();
-        console.log(genres);
         fetchArtists();
-        console.log(artists);
     }, []);
 
 
+    const {moviename, releaseStartDate, releaseEndDate} = filterForm;
     return (
         <Fragment>
             <Header isDetailPage="false" />
@@ -199,8 +300,86 @@ export default function Home() {
                             <Typography className={classes.cardTitle} color="textSecondary" gutterBottom>
                                 FIND MOVIES BY:
                             </Typography>
-                            <form className="filter-form">
-                                <TextField id="movie-name" label="Movie Name" />
+                            <form className="filter-form" onSubmit={onFilterApplied}>
+                                <FormControl className={classes.formControl}>
+                                    <TextField
+                                        id="movie-name"
+                                        label="Movie Name"
+                                        name="moviename"
+                                        onChange={filterInputChangedHandler}
+                                        value={moviename}
+                                    />
+                                </FormControl>
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel id="genres-mutiple-checkbox-label">Genres</InputLabel>
+                                    <Select
+                                        labelId="genres-mutiple-checkbox-label"
+                                        id="genres-mutiple-checkbox"
+                                        multiple
+                                        value={genresSelected}
+                                        onChange={handleGenreChange}
+                                        input={<Input />}
+                                        renderValue={(selected) => selected.join(', ')}
+                                    >
+                                        {allGenres.map((name) => (
+                                            <MenuItem key={name} value={name}>
+                                                <Checkbox checked={genresSelected.indexOf(name) > -1} />
+                                                <ListItemText primary={name} />
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel id="artists-mutiple-checkbox-label">Artists</InputLabel>
+                                    <Select
+                                        labelId="artists-mutiple-checkbox-label"
+                                        id="artists-mutiple-checkbox"
+                                        multiple
+                                        value={artistsSelected}
+                                        onChange={handleArtistChange}
+                                        input={<Input />}
+                                        renderValue={(selected) => selected.join(', ')}
+                                    >
+                                        {allArtists.map((name) => (
+                                            <MenuItem key={name} value={name}>
+                                                <Checkbox checked={artistsSelected.indexOf(name) > -1} />
+                                                <ListItemText primary={name} />
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <FormControl className={classes.formControl}>
+                                    <TextField
+                                        id="start-date"
+                                        label="Release Date Start"
+                                        type="date"
+                                        defaultValue="dd-mm-yyyy"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        name="releaseStartDate"
+                                        onChange={filterInputChangedHandler}
+                                        value={releaseStartDate}
+                                    />
+                                </FormControl>
+                                <FormControl className={classes.formControl}>
+                                    <TextField
+                                        id="end-date"
+                                        label="Release Date End"
+                                        type="date"
+                                        defaultValue="dd-mm-yyyy"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        name="releaseEndDate"
+                                        onChange={filterInputChangedHandler}
+                                        value={releaseEndDate}
+                                    />
+                                </FormControl>
+                                <FormControl className={classes.formControl}>
+                                    <Button className="applyBtn" name="Apply" variant="contained" color="primary"
+                                            type="submit">APPLY</Button>
+                                </FormControl>
                             </form>
                         </CardContent>
 
