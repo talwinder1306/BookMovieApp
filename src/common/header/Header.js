@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import './Header.css';
 import {Button} from '@material-ui/core'
-import {ReactComponent as Logo} from '../../assets/logo.svg'
+import logo from '../../assets/logo.svg'
 import AuthModal from "./AuthModal";
 
 export default function Header(props) {
 
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = React.useState(false); //Modal
 
     const [accessToken, setAccessToken] = useState(false);
     const [loginBtn, setLoginBtn] = useState('Login');
@@ -40,7 +40,7 @@ export default function Header(props) {
     return (
        <header className="header-element" >
            <div className="logo-container">
-               <Logo className="logo"/>
+               <img src={logo} className="logo" alt="logo"/>
            </div>
            <div className="header-btn-container">
                {showBookShow? <Button className="bookShow" name="Book Show" variant="contained" color="primary">Book Show</Button> : null}

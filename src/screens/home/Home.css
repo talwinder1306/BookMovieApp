@@ -1,0 +1,21 @@
+.type-heading {
+    background-color: #ff9999;
+    text-align: center;
+    padding: 8px;
+    font-size: 1rem;
+}
+
+.released-movie-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.filter-movies {
+    width: 24%;
+    margin: 16px;
+}
+
+.released-movies {
+    width: 76%;
+    margin: 16px;
+}
