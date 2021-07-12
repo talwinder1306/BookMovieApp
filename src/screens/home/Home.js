@@ -23,6 +23,7 @@ export default function Home(props) {
 
     const [upcomingMovies, setUpcomingMovies] = useState([]);
     const [releasedMovies, setReleasedMovies] = useState([]);
+    const [completeReleasedMovies, setCompleteReleasedMovies] = useState([]);
     const [allGenres, setAllGenres] = useState([]);
     const [allArtists, setAllArtists] = useState([]);
     const [genresSelected, setGenresSelected] = useState([]);
@@ -123,6 +124,7 @@ export default function Home(props) {
                         })
                         setUpcomingMovies(newUpcomingMovies);
                         setReleasedMovies(newReleasedMovies);
+                        setCompleteReleasedMovies(newReleasedMovies);
                         console.log(newReleasedMovies);
                     })
             })
@@ -181,12 +183,12 @@ export default function Home(props) {
 
     const onFilterApplied = (e) => {
         e.preventDefault();
-        let filteredList = releasedMovies;
+        let filteredList = completeReleasedMovies;
         if(moviename !== '') {
-            filteredList = filteredList.filter(data => data.title.includes(moviename));
+            filteredList = filteredList.filter(data => data.title.toLowerCase().includes(moviename.toLowerCase()));
         }
         console.log(filteredList);
-        if(releaseStartDate !== '' && releaseEndDate !== '') {
+        if(releaseStartDate !== 'dd-mm-yyyy' && releaseEndDate !== 'dd-mm-yyyy') {
             filteredList = filteredList.filter(data => {
                 const release = new Date(data.release_date).getTime();
                 const start = new Date(releaseStartDate).getTime();
@@ -232,39 +234,13 @@ export default function Home(props) {
         }
 
         console.log(filteredList);
-        let newReleasedMovies = releasedMovies;
-        newReleasedMovies = newReleasedMovies
-            .filter(ele => !filteredList.includes(ele))
-            .map(ele => {
-                const {id, title, poster_url, release_date, genres, artists} = ele;
-                const val = {
-                    id: id,
-                    title: title,
-                    poster_url: poster_url,
-                    release_date: release_date,
-                    genres: genres,
-                    artists: artists,
-                    show: false
-                };
-                return val
-            });
-        filteredList = filteredList
-            .map(ele => {
-                const {id, title, poster_url, release_date, genres, artists} = ele;
-                const val = {
-                    id: id,
-                    title: title,
-                    poster_url: poster_url,
-                    release_date: release_date,
-                    genres: genres,
-                    artists: artists,
-                    show: true
-                };
-                return val
-            })
-        newReleasedMovies = [...newReleasedMovies, ...filteredList];
-        console.log(newReleasedMovies);
-        setReleasedMovies(newReleasedMovies);
+
+        if(moviename === '' && (releaseStartDate === '' || releaseEndDate === '')
+            && genresSelected.length === 0 && artistsSelected.length === 0) {
+            setReleasedMovies(completeReleasedMovies);
+        } else {
+            setReleasedMovies(filteredList);
+        }
     }
     
     useEffect(() => {
