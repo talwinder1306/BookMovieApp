@@ -117,8 +117,7 @@ export default function Home(props) {
                                 poster_url: poster_url,
                                 release_date: release_date_formatted,
                                 genres: genres,
-                                artists: artists,
-                                show: true
+                                artists: artists
                             };
                             newReleasedMovies.push(val);
                         })
@@ -280,7 +279,7 @@ export default function Home(props) {
                                 releasedMovies.map(movie =>  (
 
                                         <GridListTile
-                                            className={movie.show === true? classes.rgridListTile : classes.rgridListTitleHide}
+                                            className={classes.rgridListTile}
                                             key={movie.poster_url}
                                             >
                                             <Link to={"/movie/" + movie.id} >
