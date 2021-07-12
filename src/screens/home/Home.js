@@ -19,7 +19,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { Link } from 'react-router-dom';
 import {makeStyles} from "@material-ui/core";
 
-export default function Home() {
+export default function Home(props) {
 
     const [upcomingMovies, setUpcomingMovies] = useState([]);
     const [releasedMovies, setReleasedMovies] = useState([]);
@@ -29,8 +29,8 @@ export default function Home() {
     const [artistsSelected, setArtistsSelected] = useState([]);
     const [filterForm, setFilterForm] = useState({
         moviename: '',
-        releaseStartDate: '',
-        releaseEndDate: '',
+        releaseStartDate: 'dd-mm-yyyy',
+        releaseEndDate: 'dd-mm-yyyy',
     })
 
     const useStyles = makeStyles((theme) => ({
@@ -277,10 +277,12 @@ export default function Home() {
     const {moviename, releaseStartDate, releaseEndDate} = filterForm;
     return (
         <Fragment>
-            <Header isDetailPage="false" />
+            <Header isDetailPage="false"
+                    accessToken={props.accessToken} loginBtn={props.loginBtn}
+                    setAccessToken={props.setAccessToken} setLoginBtn={props.setLoginBtn}/>
             <div className="type-heading">Upcoming Movie</div>
             <div className={classes.ugridMain}>
-            <GridList className={classes.ugridList} cols={6} cellHeight="250">
+            <GridList className={classes.ugridList} cols={6} cellHeight={250}>
                 {
                     upcomingMovies.map(movie =>  (
                             <GridListTile
@@ -297,7 +299,7 @@ export default function Home() {
             <div className="released-movie-container">
                 <div className="released-movies">
                     <div className={classes.rgridMain}>
-                        <GridList className={classes.rgridList} cols={4} cellHeight="350">
+                        <GridList className={classes.rgridList} cols={4} cellHeight={350}>
                             {
                                 releasedMovies.map(movie =>  (
 
@@ -305,10 +307,7 @@ export default function Home() {
                                             className={movie.show === true? classes.rgridListTile : classes.rgridListTitleHide}
                                             key={movie.poster_url}
                                             >
-                                            <Link to={{
-                                                pathname: '/detail',
-                                                movieId : movie.id
-                                            }} >
+                                            <Link to={"/movie/" + movie.id} >
                                                 <img src={movie.poster_url} alt={movie.title} className="image-link"/>
                                             </Link>
                                             <GridListTileBar
@@ -382,7 +381,6 @@ export default function Home() {
                                         id="start-date"
                                         label="Release Date Start"
                                         type="date"
-                                        defaultValue="dd-mm-yyyy"
                                         InputLabelProps={{
                                             shrink: true,
                                         }}
@@ -396,7 +394,6 @@ export default function Home() {
                                         id="end-date"
                                         label="Release Date End"
                                         type="date"
-                                        defaultValue="dd-mm-yyyy"
                                         InputLabelProps={{
                                             shrink: true,
                                         }}

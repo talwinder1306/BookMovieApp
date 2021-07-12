@@ -11,9 +11,11 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import Button from "@material-ui/core/Button";
 import FormHelperText from "@material-ui/core/FormHelperText";
-import { Link } from "react-router-dom";
+import {Link, useParams, useHistory} from "react-router-dom";
 
 const BookShow = (props) => {
+  const params = useParams();
+  const history = useHistory();
   const [location, setLocation] = useState("");
   const [theatre, setTheatre] = useState("");
   const [language, setLanguage] = useState("");
@@ -33,10 +35,10 @@ const BookShow = (props) => {
   const [originalShows, setOriginalShows] = useState([]);
   const [showId, setShowId] = useState("");
 
+
   useEffect(() => {
     let dataShows = null;
-
-    fetch(props.baseUrl + "movies/" + props.match.params.id + "/shows", {
+    fetch(props.baseUrl + "movies/" + params.id + "/shows", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -166,8 +168,8 @@ const BookShow = (props) => {
       return;
     }
 
-    props.history.push({
-      pathname: "/confirm/" + props.match.params.id,
+    history.push({
+      pathname: "/confirm/" + params.id,
       bookingSummary: {
         location,
         theatre,
@@ -193,10 +195,13 @@ const BookShow = (props) => {
 
   return (
     <div>
-      <Header baseUrl={props.baseUrl} />
+      <Header baseUrl={props.baseUrl}
+              accessToken={props.accessToken} loginBtn={props.loginBtn}
+              setAccessToken={props.setAccessToken} setLoginBtn={props.setLoginBtn}
+      />
       <div className="bookShow">
         <Typography className="back">
-          <Link to={"/movie/" + props.match.params.id}>
+          <Link to={"/movie/" + params.id}>
             &#60; Back to Movie Details
           </Link>
         </Typography>

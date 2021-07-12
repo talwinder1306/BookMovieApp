@@ -1,19 +1,20 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, Fragment} from 'react';
 import './Header.css';
 import {Button} from '@material-ui/core'
 import logo from '../../assets/logo.svg'
 import AuthModal from "./AuthModal";
+import {Link} from "react-router-dom";
 
 export default function Header(props) {
 
     const [open, setOpen] = React.useState(false); //Modal
 
-    const [accessToken, setAccessToken] = useState('');
-    const [loginBtn, setLoginBtn] = useState('Login');
     const [showBookShow, setShowBookShow] = useState(false);
+    const [redirectBookShow, setRedirectBookShow] = useState(false);
 
     useEffect(() => {
         setShowBookShow(props.isDetailPage === 'true');
+        setRedirectBookShow(props.accessToken !== '')
     }, []);
 
     const handleOpen = () => {
@@ -28,37 +29,49 @@ export default function Header(props) {
         const rawResponse = await fetch('http://localhost:8085/api/v1/auth/logout', {
             method:'POST',
             headers:{
-                'Authorization': `Bearer ${accessToken}`
+                'Authorization': `Bearer ${props.accessToken}`
             },
         });
 
         if(rawResponse.ok) {
-            setLoginBtn('Login');
+            props.setLoginBtn('Login');
         }
     };
 
     const handleBookShow = () => {
-        if(accessToken === '' || loginBtn === 'Login') {
+        if(props.accessToken === '' || props.loginBtn === 'Login') {
             handleOpen();
         } else {
-            alert("Show Booked")
+            setRedirectBookShow(true);
         }
     };
 
     return (
-       <header className="header-element" >
-           <div className="logo-container">
-               <img src={logo} className="logo" alt="logo"/>
-           </div>
-           <div className="header-btn-container">
-               {showBookShow?
-                   <Button className="bookShow" name="Book Show" variant="contained" color="primary" onClick={handleBookShow}>Book Show</Button> : null}
+        <Fragment>
+            <header className="header-element" >
+                <div className="logo-container">
+                    <img src={logo} className="logo" alt="logo"/>
+                </div>
+                <div className="header-btn-container">
+                    {showBookShow ?
+                        redirectBookShow ?
+                            <Link to={"/bookshow/" + props.movieId}>
+                                <Button className="bookShow" name="Book Show" variant="contained" color="primary" onClick={handleBookShow}>
+                                    Book Show
+                                </Button>
+                            </Link>
+                                :
+                        <Button className="bookShow" name="Book Show" variant="contained" color="primary" onClick={handleBookShow}>
+                            Book Show
+                        </Button> : null}
 
-               {loginBtn === 'Login' ? <Button className="header-btn" variant="contained" name={loginBtn} onClick={handleOpen}>{loginBtn}</Button> :
-                   <Button className="header-btn" variant="contained" name={loginBtn} onClick={handleLogout}>{loginBtn}</Button>}
+                    {props.loginBtn === 'Login' ? <Button className="header-btn" variant="contained" name={props.loginBtn} onClick={handleOpen}>{props.loginBtn}</Button> :
+                        <Button className="header-btn" variant="contained" name={props.loginBtn} onClick={handleLogout}>{props.loginBtn}</Button>}
 
-               <AuthModal open={open} handleClose={handleClose} setAccessToken={setAccessToken} setLoginBtn={setLoginBtn}/>
-           </div>
-        </header>
+                    <AuthModal open={open} handleClose={handleClose} setAccessToken={props.setAccessToken} setLoginBtn={props.setLoginBtn}/>
+                </div>
+            </header>
+        </Fragment>
+
     )
 }

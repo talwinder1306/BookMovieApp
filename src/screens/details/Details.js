@@ -8,10 +8,10 @@ import StarBorderIcon from '@material-ui/icons/StarBorder';
 import GridListTile from "@material-ui/core/GridListTile";
 import GridListTileBar from "@material-ui/core/GridListTileBar";
 import GridList from "@material-ui/core/GridList";
-import { Link, useLocation, Redirect } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 export default function Details(props) {
-    const location = useLocation();
+    const params = useParams();
     const [movieDetails, setMovieDetails] = useState({
         id: '',
         title: '',
@@ -28,7 +28,7 @@ export default function Details(props) {
     const[stars, setStars] = useState([false,false,false,false,false]);
 
     const fetchMovie = () => {
-        const movieId = location.movieId;
+        const movieId = params.id;
         fetch(`http://localhost:8085/api/v1/movies/${movieId}`)
             .then(response => response.json())
             .then(data => {
@@ -104,8 +104,10 @@ export default function Details(props) {
 
     return (
         <Fragment>
-            {location.movieId === undefined || location.movieId === ''? <Redirect to="/" /> : ''}
-            <Header isDetailPage="true" />
+            <Header isDetailPage="true" movieId={movieDetails.id}
+                    accessToken={props.accessToken} loginBtn={props.loginBtn}
+                    setAccessToken={props.setAccessToken} setLoginBtn={props.setLoginBtn}
+            />
             <Link to="/">
                 <Typography id="backToHomeBtn" variant="button" display="block" gutterBottom>
                     {'<'} Back to Home
@@ -166,7 +168,7 @@ export default function Details(props) {
                         Artists:
                     </Typography>
 
-                    <GridList className={classes.gridMain} cols={2} cellHeight="250">
+                    <GridList className={classes.gridMain} cols={2} cellHeight={250}>
                         {
                             movieDetails.artists.map(artist =>  (
                                     <GridListTile
