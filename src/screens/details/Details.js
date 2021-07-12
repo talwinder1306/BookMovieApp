@@ -8,7 +8,7 @@ import StarBorderIcon from '@material-ui/icons/StarBorder';
 import GridListTile from "@material-ui/core/GridListTile";
 import GridListTileBar from "@material-ui/core/GridListTileBar";
 import GridList from "@material-ui/core/GridList";
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Redirect } from 'react-router-dom';
 
 export default function Details(props) {
     const location = useLocation();
@@ -25,6 +25,8 @@ export default function Details(props) {
         storyline: '',
         artists: []
     });
+    const[stars, setStars] = useState([false,false,false,false,false]);
+
     const fetchMovie = () => {
         const movieId = location.movieId;
         fetch(`http://localhost:8085/api/v1/movies/${movieId}`)
@@ -82,14 +84,27 @@ export default function Details(props) {
     };
 
     const onRatingClick = (e) => {
-        e.target.style.color = 'yellow';
+        const id = e.target.id;
+        const n = id.substring(5);
+        const star = [];
+        for(let i=0; i < 5; i++) {
+            if(i <= n) {
+                star[i] = true;
+            } else {
+                star[i] = false;
+            }
+        }
+
+        setStars(star);
     }
 
-    const videoId = movieDetails !== undefined? movieDetails.trailer_url.slice(movieDetails.trailer_url.indexOf('?v=') + 3, movieDetails.trailer_url.length) : '';
-    console.log(videoId);
+    const videoId = movieDetails !== undefined && movieDetails.trailer_url !== undefined?
+        movieDetails.trailer_url.slice(movieDetails.trailer_url.indexOf('?v=') + 3, movieDetails.trailer_url.length) : '';
+    const numberOfStars = 5;
 
     return (
         <Fragment>
+            {location.movieId === undefined || location.movieId === ''? <Redirect to="/" /> : ''}
             <Header isDetailPage="true" />
             <Link to="/">
                 <Typography id="backToHomeBtn" variant="button" display="block" gutterBottom>
@@ -136,13 +151,17 @@ export default function Details(props) {
                         Rate this movie:
                     </Typography>
                     <div className="star-container">
-                        <StarBorderIcon className="star-icon" onClick={onRatingClick}></StarBorderIcon>
-                        <StarBorderIcon className="star-icon" onClick={onRatingClick}></StarBorderIcon>
-                        <StarBorderIcon className="star-icon" onClick={onRatingClick}></StarBorderIcon>
-                        <StarBorderIcon className="star-icon" onClick={onRatingClick}></StarBorderIcon>
-                        <StarBorderIcon className="star-icon" onClick={onRatingClick}></StarBorderIcon>
+                        {[...Array(+numberOfStars).keys()].map(n => {
+                            return (
+                                <StarBorderIcon
+                                    key={`star-${n}`}
+                                    id={`star-${n}`}
+                                    onClick={onRatingClick}
+                                    className={stars[n] === true ? 'star-selected': 'star-icon'}
+                                ></StarBorderIcon>
+                            );
+                        })}
                     </div>
-
                     <Typography className={`${classes.boldText} ${classes.sectionSpace}`}   >
                         Artists:
                     </Typography>

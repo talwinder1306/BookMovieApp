@@ -28,6 +28,10 @@
     font-size: 16px;
 }
 
+.star-selected {
+    color: yellow;
+    font-size: 16px;
+}
 a {
     text-decoration: none;
 }

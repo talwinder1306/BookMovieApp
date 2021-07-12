@@ -23,7 +23,6 @@ export default function Home() {
 
     const [upcomingMovies, setUpcomingMovies] = useState([]);
     const [releasedMovies, setReleasedMovies] = useState([]);
-    const [completeReleasedMovies, setCompleteReleasedMovies] = useState([]);
     const [allGenres, setAllGenres] = useState([]);
     const [allArtists, setAllArtists] = useState([]);
     const [genresSelected, setGenresSelected] = useState([]);
@@ -32,7 +31,6 @@ export default function Home() {
         moviename: '',
         releaseStartDate: '',
         releaseEndDate: '',
-
     })
 
     const useStyles = makeStyles((theme) => ({
@@ -56,8 +54,6 @@ export default function Home() {
                 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
         },
         rgridMain: {
-            display: 'flex',
-            flexWrap: 'wrap',
             justifyContent: 'space-around',
             overflow: 'hidden',
             backgroundColor: theme.palette.background.paper,
@@ -65,6 +61,9 @@ export default function Home() {
         rgridListTile: {
             margin: '16px',
             cursor: "pointer",
+        },
+        rgridListTitleHide: {
+            display: "none",
         },
         card: {
             minWidth: 275,
@@ -117,13 +116,13 @@ export default function Home() {
                                 poster_url: poster_url,
                                 release_date: release_date_formatted,
                                 genres: genres,
-                                artists: artists
+                                artists: artists,
+                                show: true
                             };
                             newReleasedMovies.push(val);
                         })
                         setUpcomingMovies(newUpcomingMovies);
                         setReleasedMovies(newReleasedMovies);
-                        setCompleteReleasedMovies(newReleasedMovies);
                         console.log(newReleasedMovies);
                     })
             })
@@ -182,7 +181,7 @@ export default function Home() {
 
     const onFilterApplied = (e) => {
         e.preventDefault();
-        let filteredList = completeReleasedMovies;
+        let filteredList = releasedMovies;
         if(moviename !== '') {
             filteredList = filteredList.filter(data => data.title.includes(moviename));
         }
@@ -233,13 +232,39 @@ export default function Home() {
         }
 
         console.log(filteredList);
-
-        if(moviename === '' && (releaseStartDate === '' || releaseEndDate === '')
-            && genresSelected.length === 0 && artistsSelected.length === 0) {
-            setReleasedMovies(completeReleasedMovies);
-        } else {
-            setReleasedMovies(filteredList);
-        }
+        let newReleasedMovies = releasedMovies;
+        newReleasedMovies = newReleasedMovies
+            .filter(ele => !filteredList.includes(ele))
+            .map(ele => {
+                const {id, title, poster_url, release_date, genres, artists} = ele;
+                const val = {
+                    id: id,
+                    title: title,
+                    poster_url: poster_url,
+                    release_date: release_date,
+                    genres: genres,
+                    artists: artists,
+                    show: false
+                };
+                return val
+            });
+        filteredList = filteredList
+            .map(ele => {
+                const {id, title, poster_url, release_date, genres, artists} = ele;
+                const val = {
+                    id: id,
+                    title: title,
+                    poster_url: poster_url,
+                    release_date: release_date,
+                    genres: genres,
+                    artists: artists,
+                    show: true
+                };
+                return val
+            })
+        newReleasedMovies = [...newReleasedMovies, ...filteredList];
+        console.log(newReleasedMovies);
+        setReleasedMovies(newReleasedMovies);
     }
     
     useEffect(() => {
@@ -277,7 +302,7 @@ export default function Home() {
                                 releasedMovies.map(movie =>  (
 
                                         <GridListTile
-                                            className={classes.rgridListTile}
+                                            className={movie.show === true? classes.rgridListTile : classes.rgridListTitleHide}
                                             key={movie.poster_url}
                                             >
                                             <Link to={{
