@@ -10,8 +10,29 @@ import GridListTileBar from "@material-ui/core/GridListTileBar";
 import GridList from "@material-ui/core/GridList";
 import { Link, useParams } from 'react-router-dom';
 
-export default function Details(props) {
+export default function Details({baseUrl, setAccessToken, accessToken, loginBtn, setLoginBtn}) {
+    const useStyles = makeStyles((theme) => ({
+        boldText: {
+            fontWeight: "bold",
+        },
+        sectionSpace: {
+            marginTop: 16
+        },
+        gridMain: {
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'space-around',
+            overflow: 'hidden',
+            backgroundColor: theme.palette.background.paper,
+        }
+    }));
+
+    const classes = useStyles();
+
     const params = useParams();
+    /**
+     * State
+     */
     const [movieDetails, setMovieDetails] = useState({
         id: '',
         title: '',
@@ -27,9 +48,12 @@ export default function Details(props) {
     });
     const[stars, setStars] = useState([false,false,false,false,false]);
 
+    /**
+     * Fetching data from backend and setting state variables
+     */
     const fetchMovie = () => {
         const movieId = params.id;
-        fetch(`http://localhost:8085/api/v1/movies/${movieId}`)
+        fetch(`${baseUrl}movies/${movieId}`)
             .then(response => response.json())
             .then(data => {
                 const {id, title, poster_url, trailer_url, genres, duration,release_date, rating, wiki_url, storyline, artists} = data;
@@ -56,23 +80,10 @@ export default function Details(props) {
         fetchMovie();
     }, []);
 
-    const useStyles = makeStyles((theme) => ({
-        boldText: {
-            fontWeight: "bold",
-        },
-        sectionSpace: {
-            marginTop: 16
-        },
-        gridMain: {
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'space-around',
-            overflow: 'hidden',
-            backgroundColor: theme.palette.background.paper,
-        }
-    }));
-
-    const classes = useStyles();
+    /**
+     * Setting properties for trailer video
+     * @type {{playerVars: {autoplay: number}, width: string, height: string}}
+     */
 
     const opts = {
         height: '390',
@@ -82,31 +93,32 @@ export default function Details(props) {
             autoplay: 1,
         },
     };
+    const videoId = movieDetails !== undefined && movieDetails.trailer_url !== undefined?
+        movieDetails.trailer_url.slice(movieDetails.trailer_url.indexOf('?v=') + 3, movieDetails.trailer_url.length) : '';
 
+    /**
+     * This handles the rating stars click
+     * @param e
+     */
     const onRatingClick = (e) => {
         const id = e.target.id;
         const n = id.substring(5);
         const star = [];
         for(let i=0; i < 5; i++) {
-            if(i <= n) {
-                star[i] = true;
-            } else {
-                star[i] = false;
-            }
+            star[i] = i <= n;
         }
 
         setStars(star);
     }
 
-    const videoId = movieDetails !== undefined && movieDetails.trailer_url !== undefined?
-        movieDetails.trailer_url.slice(movieDetails.trailer_url.indexOf('?v=') + 3, movieDetails.trailer_url.length) : '';
     const numberOfStars = 5;
 
     return (
         <Fragment>
             <Header isDetailPage="true" movieId={movieDetails.id}
-                    accessToken={props.accessToken} loginBtn={props.loginBtn}
-                    setAccessToken={props.setAccessToken} setLoginBtn={props.setLoginBtn}
+                    accessToken={accessToken} loginBtn={loginBtn}
+                    setAccessToken={setAccessToken} setLoginBtn={setLoginBtn}
+                    baseUrl={baseUrl}
             />
             <Link to="/">
                 <Typography id="backToHomeBtn" variant="button" display="block" gutterBottom>
@@ -184,6 +196,5 @@ export default function Details(props) {
                 </div>
             </div>
         </Fragment>
-
     )
 }

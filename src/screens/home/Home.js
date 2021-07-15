@@ -19,21 +19,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import { Link } from 'react-router-dom';
 import {makeStyles} from "@material-ui/core";
 
-export default function Home(props) {
-
-    const [upcomingMovies, setUpcomingMovies] = useState([]);
-    const [releasedMovies, setReleasedMovies] = useState([]);
-    const [completeReleasedMovies, setCompleteReleasedMovies] = useState([]);
-    const [allGenres, setAllGenres] = useState([]);
-    const [allArtists, setAllArtists] = useState([]);
-    const [genresSelected, setGenresSelected] = useState([]);
-    const [artistsSelected, setArtistsSelected] = useState([]);
-    const [filterForm, setFilterForm] = useState({
-        moviename: '',
-        releaseStartDate: 'dd-mm-yyyy',
-        releaseEndDate: 'dd-mm-yyyy',
-    })
-
+export default function Home( {setAccessToken,accessToken, loginBtn, setLoginBtn, baseUrl} ) {
     const useStyles = makeStyles((theme) => ({
         ugridMain: {
             display: 'flex',
@@ -85,6 +71,27 @@ export default function Home(props) {
     }));
 
     const classes = useStyles();
+
+    /**
+     * State
+     */
+    const [upcomingMovies, setUpcomingMovies] = useState([]);
+    const [releasedMovies, setReleasedMovies] = useState([]);
+    const [completeReleasedMovies, setCompleteReleasedMovies] = useState([]);
+    const [allGenres, setAllGenres] = useState([]);
+    const [allArtists, setAllArtists] = useState([]);
+    const [genresSelected, setGenresSelected] = useState([]);
+    const [artistsSelected, setArtistsSelected] = useState([]);
+    const [filterForm, setFilterForm] = useState({
+        moviename: '',
+        releaseStartDate: 'dd-mm-yyyy',
+        releaseEndDate: 'dd-mm-yyyy',
+    })
+
+    /**
+     * Fetching data from backend and setting state variables
+     */
+
     const fetchMoviesList = () => {
         fetch('http://localhost:8085/api/v1/movies?page=1&limit=10')
             .then(response => response.json())
@@ -124,7 +131,6 @@ export default function Home(props) {
                         setUpcomingMovies(newUpcomingMovies);
                         setReleasedMovies(newReleasedMovies);
                         setCompleteReleasedMovies(newReleasedMovies);
-                        console.log(newReleasedMovies);
                     })
             })
     }
@@ -141,7 +147,6 @@ export default function Home(props) {
                 )
 
                 setAllGenres(newGenres);
-                console.log(`Genres ${allGenres}`);
             });
     }
 
@@ -161,10 +166,19 @@ export default function Home(props) {
                         })
 
                         setAllArtists(newArtists);
-                        console.log(allArtists);
                     })
             });
     }
+
+    useEffect(() => {
+        fetchMoviesList();
+        fetchGenres();
+        fetchArtists();
+    }, []);
+
+    /**
+     * Methods that handle Filter functionality
+     */
 
     const handleGenreChange = (event) => {
         setGenresSelected(event.target.value);
@@ -186,7 +200,7 @@ export default function Home(props) {
         if(moviename !== '') {
             filteredList = filteredList.filter(data => data.title.toLowerCase().includes(moviename.toLowerCase()));
         }
-        console.log(filteredList);
+
         if(releaseStartDate !== 'dd-mm-yyyy' && releaseEndDate !== 'dd-mm-yyyy') {
             filteredList = filteredList.filter(data => {
                 const release = new Date(data.release_date).getTime();
@@ -195,10 +209,9 @@ export default function Home(props) {
                 return release >= start && release <= end
             });
         }
-        console.log(genresSelected);
+
         if(genresSelected.length > 0) {
             filteredList = filteredList.filter(data => {
-                console.log(data.genres);
                 let result = false;
                 for(let i=0; i < data.genres.length; i++) {
                     const d = data.genres[i];
@@ -207,18 +220,13 @@ export default function Home(props) {
                         break;
                     }
                 }
-                console.log(result);
+
                 return result;
             });
         }
 
-        console.log(filteredList);
-
-        console.log(artistsSelected);
-
         if(artistsSelected.length > 0) {
             filteredList = filteredList.filter(data => {
-                console.log(data.artists);
                 let result = false;
                 for(let i=0; i < data.artists.length; i++) {
                     const d = `${data.artists[i].first_name} ${data.artists[i].last_name}`;
@@ -227,12 +235,9 @@ export default function Home(props) {
                         break;
                     }
                 }
-                console.log(result);
                 return result;
             });
         }
-
-        console.log(filteredList);
 
         if(moviename === '' && (releaseStartDate === '' || releaseEndDate === '')
             && genresSelected.length === 0 && artistsSelected.length === 0) {
@@ -241,20 +246,16 @@ export default function Home(props) {
             setReleasedMovies(filteredList);
         }
     }
-    
-    useEffect(() => {
-        fetchMoviesList();
-        fetchGenres();
-        fetchArtists();
-    }, []);
 
 
     const {moviename, releaseStartDate, releaseEndDate} = filterForm;
+
     return (
         <Fragment>
             <Header isDetailPage="false"
-                    accessToken={props.accessToken} loginBtn={props.loginBtn}
-                    setAccessToken={props.setAccessToken} setLoginBtn={props.setLoginBtn}/>
+                    accessToken={accessToken} loginBtn={loginBtn}
+                    setAccessToken={setAccessToken} setLoginBtn={setLoginBtn}
+                    baseUrl={baseUrl}/>
             <div className="type-heading">Upcoming Movie</div>
             <div className={classes.ugridMain}>
             <GridList className={classes.ugridList} cols={6} cellHeight={250}>

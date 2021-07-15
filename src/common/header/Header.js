@@ -5,17 +5,29 @@ import logo from '../../assets/logo.svg'
 import AuthModal from "./AuthModal";
 import {Link} from "react-router-dom";
 
-export default function Header(props) {
+/**
+ * This component renders the header with rotating logo and Login/Logout and Book Show buttons
+ * @param props isDetailPage, accessToken, setAccessToken
+ * @returns {JSX.Element}
+ * @constructor
+ */
+export default function Header({isDetailPage, loginBtn, accessToken, setAccessToken, setLoginBtn, baseUrl, movieId}) {
 
+    /**
+     * State
+     */
     const [open, setOpen] = React.useState(false); //Modal
-
     const [showBookShow, setShowBookShow] = useState(false);
     const [redirectBookShow, setRedirectBookShow] = useState(false);
 
     useEffect(() => {
-        setShowBookShow(props.isDetailPage === 'true');
-        setRedirectBookShow(props.accessToken !== '')
+        setShowBookShow(isDetailPage === 'true');
+        setRedirectBookShow(accessToken !== '')
     }, []);
+
+    /**
+     * These method handles the opening and closing of Login/Register modal.
+     */
 
     const handleOpen = () => {
         setOpen(true);
@@ -25,21 +37,30 @@ export default function Header(props) {
         setOpen(false);
     };
 
+    /**
+     * This method handles the Logout function
+     *
+     */
+
     const handleLogout = async () => {
-        const rawResponse = await fetch('http://localhost:8085/api/v1/auth/logout', {
+        const rawResponse = await fetch(baseUrl+'auth/logout', {
             method:'POST',
             headers:{
-                'Authorization': `Bearer ${props.accessToken}`
+                'Authorization': `Bearer ${accessToken}`
             },
         });
 
         if(rawResponse.ok) {
-            props.setLoginBtn('Login');
+            setLoginBtn('Login');
         }
     };
-
+    /**
+     * This method handles the Book Show button.
+     * It displays Login/Register modal if the user is not logged in
+     * Else it redirects to bookshow page
+     */
     const handleBookShow = () => {
-        if(props.accessToken === '' || props.loginBtn === 'Login') {
+        if(accessToken === '' || loginBtn === 'Login') {
             handleOpen();
         } else {
             setRedirectBookShow(true);
@@ -55,20 +76,30 @@ export default function Header(props) {
                 <div className="header-btn-container">
                     {showBookShow ?
                         redirectBookShow ?
-                            <Link to={"/bookshow/" + props.movieId}>
-                                <Button className="bookShow" name="Book Show" variant="contained" color="primary" onClick={handleBookShow}>
+                            <Link to={"/bookshow/" + movieId}>
+                                <Button className="bookShow" name="Book Show" variant="contained" color="primary"
+                                        onClick={handleBookShow}>
                                     Book Show
                                 </Button>
                             </Link>
-                                :
-                        <Button className="bookShow" name="Book Show" variant="contained" color="primary" onClick={handleBookShow}>
-                            Book Show
-                        </Button> : null}
+                            :
+                            <Button className="bookShow" name="Book Show" variant="contained" color="primary"
+                                    onClick={handleBookShow}>
+                                Book Show
+                            </Button> : null
+                    }
 
-                    {props.loginBtn === 'Login' ? <Button className="header-btn" variant="contained" name={props.loginBtn} onClick={handleOpen}>{props.loginBtn}</Button> :
-                        <Button className="header-btn" variant="contained" name={props.loginBtn} onClick={handleLogout}>{props.loginBtn}</Button>}
+                    {loginBtn === 'Login' ?
+                        <Button className="header-btn" variant="contained" name={loginBtn}
+                                onClick={handleOpen}>{loginBtn}</Button> :
+                        <Button className="header-btn" variant="contained" name={loginBtn}
+                                onClick={handleLogout}>{loginBtn}</Button>}
 
-                    <AuthModal open={open} handleClose={handleClose} setAccessToken={props.setAccessToken} setLoginBtn={props.setLoginBtn}/>
+                    <AuthModal open={open}
+                               handleClose={handleClose}
+                               setAccessToken={setAccessToken}
+                               setLoginBtn={setLoginBtn}
+                               baseUrl={baseUrl}/>
                 </div>
             </header>
         </Fragment>

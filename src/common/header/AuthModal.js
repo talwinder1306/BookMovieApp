@@ -8,6 +8,12 @@ import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
 import {ValidatorForm,TextValidator} from 'react-material-ui-form-validator'
 
+/**
+ * This component handles the TabPanels rendering and displaying active tab
+ * @param props
+ * @returns TabPanel
+ * @constructor
+ */
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
 
@@ -41,7 +47,13 @@ function a11yProps(index) {
     };
 }
 
-export default function AuthModal(props) {
+/**
+ * This component renders the Login/Register modal
+ * @param props setAccessToken, accessToken, setLoginBtn, loginBtn, handleClose
+ * @returns {JSX.Element}
+ * @constructor
+ */
+export default function AuthModal({setLoginBtn,setAccessToken,handleClose,open,baseUrl}) {
     const useStyles = makeStyles((theme) => ({
         modal: {
             display: 'flex',
@@ -60,13 +72,35 @@ export default function AuthModal(props) {
     }));
 
     const classes = useStyles();
+    /**
+     * State variables
+     */
     const [value, setValue] = React.useState(0);
     const [loginMsg,setLoginMsg] = useState('');
-
+    const [regSuccessMsg,setRegSuccessMsg] = useState('');
     const [loginForm,setLoginForm] = useState({
         username: '',
         password: ''
     });
+
+    const [registerForm,setRegisterForm] = useState({
+        firstname: '',
+        lastname: '',
+        email: '',
+        passwordReg: '',
+        contact: ''
+    });
+
+    /**
+     * Variables
+     */
+
+    const {username,password}=loginForm;
+    const {firstname,lastname,email, passwordReg, contact}=registerForm;
+
+    /**
+     * Methods for handling Login
+     */
 
     const loginInputChangedHandler = (e) => {
         const state = loginForm;
@@ -80,7 +114,7 @@ export default function AuthModal(props) {
         e.preventDefault();
         let stringToEncode = username + ':' + password;
         let basicAuth = window.btoa(stringToEncode);
-        const rawResponse = await fetch('http://localhost:8085/api/v1/auth/login', {
+        const rawResponse = await fetch(baseUrl + 'auth/login', {
             method:'POST',
             headers:{
                 'Authorization': `Basic ${basicAuth}`
@@ -89,14 +123,14 @@ export default function AuthModal(props) {
 
         const response = await rawResponse.json();
         if(rawResponse.ok) {
-            props.setAccessToken(rawResponse.headers.get('access-token'));
-            props.setLoginBtn('Logout');
+            setAccessToken(rawResponse.headers.get('access-token'));
+            setLoginBtn('Logout');
             setLoginForm({
                 username: '',
                 password: ''
             });
             setLoginMsg('');
-            props.handleClose();
+            handleClose();
         } else {
             const errorCode = rawResponse.status;
             const errorMsg = response.message;
@@ -104,16 +138,9 @@ export default function AuthModal(props) {
         }
     }
 
-    const [registerForm,setRegisterForm] = useState({
-        firstname: '',
-        lastname: '',
-        email: '',
-        passwordReg: '',
-        contact: ''
-    });
-
-    const [regSuccessMsg,setRegSuccessMsg] = useState('');
-
+    /**
+     * Methods for handling Register
+     */
 
     const registerInputChangedHandler = (e) => {
         const state = registerForm;
@@ -133,7 +160,7 @@ export default function AuthModal(props) {
             "password": registerForm.passwordReg
         }
 
-        const rawResponse = await fetch('http://localhost:8085/api/v1/signup', {
+        const rawResponse = await fetch(baseUrl + 'signup', {
             method:'POST',
             body: JSON.stringify(body),
             headers:{
@@ -147,13 +174,13 @@ export default function AuthModal(props) {
         setRegSuccessMsg(regSuccessMessage);
     }
 
-    
-    const {username,password}=loginForm;
-    const {firstname,lastname,email, passwordReg, contact}=registerForm;
-
+    /**
+     * Rendering tabs with Login and Register Form
+     */
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
+
     const body = (
         <div className={classes.modalBody}>
             <Paper className={classes.paper}>
@@ -266,8 +293,8 @@ export default function AuthModal(props) {
 
     return (
         <Modal
-            open={props.open}
-            onClose={props.handleClose}
+            open={open}
+            onClose={handleClose}
             className={classes.modal}
             aria-labelledby="simple-modal-title"
             aria-describedby="simple-modal-description"
